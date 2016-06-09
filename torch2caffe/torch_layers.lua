@@ -210,7 +210,7 @@ M.CONVERTER = {
             end
             return new_layer
         end},
-    ['nn.SpatialConvolution$'] = simple{typename='caffe.SpatialConvolution'},
+    ['nn.SpatialConvolution'] = simple{typename='caffe.SpatialConvolution'},
     ['nn.SpatialMaxPooling'] = simple{
         typename='caffe.Pooling',
         layer=function(layer)
@@ -224,7 +224,7 @@ M.CONVERTER = {
             return layer
         end},
     ['nn.Dropout'] = simple{typename='caffe.Dropout', inplace=true},
-    ['nn.SpatialDropout'] = simple{typename='caffe.dropout', inplace=true},
+    ['nn.SpatialDropout'] = simple{typename='caffe.Dropout', inplace=true},
     ['nn.View'] = simple{
         typename='caffe.Flatten',
         layer=function(layer)
