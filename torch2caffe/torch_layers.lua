@@ -210,7 +210,7 @@ M.CONVERTER = {
             end
             return new_layer
         end},
-    ['nn.SpatialConvolution'] = simple{typename='caffe.SpatialConvolution'},
+    ['nn.SpatialConvolution$'] = simple{typename='caffe.SpatialConvolution'},
     ['nn.SpatialMaxPooling'] = simple{
         typename='caffe.Pooling',
         layer=function(layer)
