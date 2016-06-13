@@ -192,6 +192,13 @@ def dropout(torch_layer):
     layer.exclude.extend([train_only])
     return layer
 
+def power(torch_layer):
+    layer = pb2.LayerParameter()
+    layer.type = "Power"
+    layer.power_param.power = 1
+    layer.power_param.scale = 1-torch_layer["p"]
+    layer.power_param.shift = 0
+    return layer
 
 def fbthreshold(torch_layer):
     layer = pb2.LayerParameter()
@@ -299,6 +306,7 @@ def build_converter(opts):
         'caffe.SpatialConvolution': spatial_convolution,
         'caffe.Pooling': pooling,
         'caffe.Dropout': dropout,
+        'caffe.Power': power,
         'caffe.Flatten': ty('Flatten'),
         'caffe.FBThreshold': fbthreshold,
         'caffe.LSTM': lstm,

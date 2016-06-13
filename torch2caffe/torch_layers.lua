@@ -224,7 +224,7 @@ M.CONVERTER = {
             return layer
         end},
     ['nn.Dropout'] = simple{typename='caffe.Dropout', inplace=true},
-    ['nn.SpatialDropout'] = simple{typename='caffe.Dropout', inplace=true},
+    ['nn.SpatialDropout'] = simple{typename='caffe.Power', inplace=true},
     ['nn.View'] = simple{
         typename='caffe.Flatten',
         layer=function(layer)
