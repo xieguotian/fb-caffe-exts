@@ -186,10 +186,16 @@ def dropout(torch_layer):
     layer = pb2.LayerParameter()
     layer.type = "Dropout"
     layer.dropout_param.dropout_ratio = torch_layer["p"]
-    # assert torch_layer["v2"], "Only handle nn.Dropout v2"
+    #assert torch_layer["v2"], "Only handle nn.Dropout v2"
     train_only = pb2.NetStateRule()
     train_only.phase = pb2.TEST
     layer.exclude.extend([train_only])
+    return layer
+
+def elu(torch_layer):
+    layer = pb2.LayerParameter()
+    layer.type = "ELU"
+    layer.elu_param.alpha = torch_layer["alpha"]
     return layer
 
 def power(torch_layer):
@@ -306,6 +312,7 @@ def build_converter(opts):
         'caffe.SpatialConvolution': spatial_convolution,
         'caffe.Pooling': pooling,
         'caffe.Dropout': dropout,
+        'caffe.ELU': elu,
         'caffe.Power': power,
         'caffe.Flatten': ty('Flatten'),
         'caffe.FBThreshold': fbthreshold,

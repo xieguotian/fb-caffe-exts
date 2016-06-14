@@ -141,6 +141,11 @@ def load(opts):
     assert net, "Net is none?"
     return net
 
+def load_train(opts):
+    net = caffe.Net(opts["prototxt"], caffe.TRAIN)
+    assert net, "Net is none?"
+    return net
+
 def check_layer_names(opts, expected_names):
     net = caffe.proto.caffe_pb2.NetParameter()
     with open(opts["prototxt"]) as f:
