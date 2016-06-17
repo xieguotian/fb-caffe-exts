@@ -113,7 +113,7 @@ local function check(module, module2,input_dims)
 end
 
 
-check(model, model2, {1,3,66,200})
+check(model, model2, {1,3,64,256})
 
 
 -- Save the model

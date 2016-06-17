@@ -65,19 +65,21 @@ end
 
 
 local function test()
-    local torch_net = torch.load('toy14_1.t7b')
-    torch_net=torch_net.net
+    local torch_net = torch.load('gienet.t7b')
+    if  torch_net.net then
+        torch_net=torch_net.net
+    end
     torch_net:apply(function(m) m:evaluate() end)
+    --torch_net=cudnn.convert(torch_net,nn)
+    --torch_net=nn.utils.recursiveType(model, 'torch.FloatTensor')
     local opts = {}
-    opts.prototxt = '1_c.prototxt'
-    opts.caffemodel = '1_c.caffemodel' 
+    opts.prototxt = '1.prototxt'
+    opts.caffemodel = '1.caffemodel' 
     local caffe_net = t2c.load(opts)
-    --t2c.compare(opts, torch_net) 
---end
 -- 
     local inputs={}
-    local tensor = torch.load('input.txt','ascii')
-    --local tensor = torch.rand(table.unpack({1,3,66,200})):float()
+    --local tensor = torch.load('input.txt','ascii')
+    local tensor = torch.rand(table.unpack({1,3,64,256})):float()
     table.insert(inputs, {name='data', tensor=tensor})
     print ("\n\n\n\nTesting Caffe Model\n\n\n\n")
     
@@ -93,7 +95,12 @@ local function test()
             torch_outputs = torch_net:forward(torch_inputs)
     end)
     if not ok then
-        error('not ok')
+        print("\n\n\nGot error running forward: %s", err)
+        torch_net:cuda()
+        local torch_inputs = inputs_to_torch_inputs(
+            inputs, 'torch.CudaTensor')
+        torch_outputs = torch_net:forward(torch_inputs)
+        --error('not ok')
     end
     
     if type(torch_outputs) == "table" then
