@@ -56,7 +56,7 @@ g_t2c_preprocess = function(model, opts)
     model = cudnn.convert(model, nn)
     model=nn.utils.recursiveType(model, 'torch.FloatTensor')
     for _, layer in pairs(model:findModules('nn.SpatialBatchNormalization')) do
-        if 1 then -- layer.save_mean==nil then
+        if 1 layer.save_mean==nil then
             layer.save_mean = layer.running_mean
             layer.save_std = layer.running_var
             layer.save_std:pow(-0.5)
