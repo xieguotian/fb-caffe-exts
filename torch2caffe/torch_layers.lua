@@ -274,7 +274,7 @@ M.CONVERTER = {
                           false))
     end,
     ['nn.SpatialBatchNormalization'] = simple{
-        typename='caffe.BN'
+        typename='caffe.BatchNorm'--'caffe.BN'
     },
 }
 

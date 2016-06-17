@@ -295,6 +295,18 @@ def bn(torch_layer):
     return layer
 
 
+def batchnorm(torch_layer):
+    layer = pb2.LayerParameter()
+    layer.type = "BatchNorm"
+    # Caffe BN doesn't support bias
+    assert torch_layer["affine"]==0
+    layer.batch_norm_param.use_global_stats = 1
+    blobs_weight = np.ones(1)
+    layer.blobs.extend([as_blob(torch_layer["running_mean"]), 
+        as_blob(torch_layer["running_var"]), as_blob(blobs_weight)])
+    return layer
+
+
 def build_converter(opts):
     return {
         'caffe.Concat': concat,
@@ -319,6 +331,7 @@ def build_converter(opts):
         'caffe.LSTM': lstm,
         'caffe.Eltwise': eltwise,
         'caffe.BN': bn,
+        'caffe.BatchNorm': batchnorm,
     }
 
 
