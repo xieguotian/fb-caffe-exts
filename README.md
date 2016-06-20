@@ -23,7 +23,7 @@
   
 0. Or custormize the conversion:
   ```bash
-  th torch2caffe/torch2caffe.lua --input torch_model.t7b --preprocessing --prepnv.lua --prototxt name.prototxt --caffemodel name.caffemodel --input_dims 1 3 64 256
+  th torch2caffe/torch2caffe.lua --input torch_model.t7b --preprocessing prepnv.lua --prototxt name.prototxt --caffemodel name.caffemodel --input_dims 1 3 64 256
   ```
 
 ### The Layers We Added Support
