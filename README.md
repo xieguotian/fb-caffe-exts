@@ -2,7 +2,7 @@
 (forked from [Cysu's branch](https://github.com/Cysu/fb-caffe-exts), originally from [fb-caffe-exts](https://github.com/facebook/fb-caffe-exts)) 
 
 ### Get Started
-0. An easy option for fast using is launch an AWS EC2 g2.x2large instance I created. Choose N.California Sever and search the instance name of FB-Torch2Caffe (ami-03542e63). 
+0. An easy option for fast using is launch an AWS EC2 g2.2xlarge instance I created. Choose N.California Sever and search the instance name of FB-Torch2Caffe (ami-03542e63). [You can follow the [AWS tutorial](http://cs231n.github.io/aws-tutorial/)]
 0. The package currently only works on Ubuntu 14.04. Please make sure Torch and Caffe (with pycaffe and python layer) are correctly installed.
 0. Download the code and install the dependencies
   ```bash
@@ -10,9 +10,10 @@
   sudo bash install-dep.sh
   ```
   
-0. Add Environment Variables **IMPORTANT**
+0. Add Environment Variables (Change the path for your own machine)
   ```bash
-  export "LD_PRELOAD=/path/to/libcaffe.so"
+  echo "export LD_PRELOAD=/path/to/libcaffe.so" >>~/.bashrc && source ~/.bashrc
+  source ~/.bashrc
   ```
   
 0. Convert your first model:
