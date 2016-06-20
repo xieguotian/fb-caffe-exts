@@ -12,7 +12,7 @@
   
 0. Add Environment Variables (Change the path for your own machine)
   ```bash
-  echo "export LD_PRELOAD=/path/to/libcaffe.so" >>~/.bashrc && source ~/.bashrc
+  echo "export LD_PRELOAD=/path/to/libcaffe.so; export PYTHONPATH=$PYTHONPATH:/path/to/caffe/python/:/path/to/fb-caffe-exts/;" >>~/.bashrc && source ~/.bashrc
   source ~/.bashrc
   ```
   
