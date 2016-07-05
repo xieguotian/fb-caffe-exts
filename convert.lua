@@ -1,23 +1,3 @@
-#!/usr/bin/env th
---++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
---!
---! model_test_loss.lua
---!
---! Brief: -- Script to take a trained model file, with all the included
---!           training and data parameters, and make it usable by our
---!           DrivePX. Major component is to save it as a .txt instead of
---!           tensor binary. However, at the time we are also downgrading
---!           models since the DrivePX is stuck on CUDNNv3
---!
---! Author: NVIDIA CORPORATION,
---!         <a href="http://www.nvidia.com">www.nvidia.com</a>
---!         Created 2016-03-18 by Karol Zieba (kzieba@nvidia.com)
---!
---! Copyright (c) 2016, NVIDIA CORPORATION. All rights reserved.
---!
---++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-
 require 'nn';
 require 'cunn';
 require 'cudnn';
