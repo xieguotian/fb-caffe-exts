@@ -76,7 +76,6 @@ echo
 git clone --depth 1 https://github.com/facebook/folly
 git clone --depth 1 https://github.com/facebook/fbthrift
 git clone https://github.com/facebook/thpp
-git clone https://github.com/facebook/fblualib
 git clone https://github.com/zhanghang1989/fblualib
 
 
