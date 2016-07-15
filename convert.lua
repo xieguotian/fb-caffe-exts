@@ -10,6 +10,7 @@ g_SLOW=""
 
 -- Figure out the path of the model and load it
 local path = arg[1]
+local basename = paths.basename(path, 't7b')
 local ext = path:match("^.+(%..+)$")
 local model = nil
 if ext == '.t7b' then 
@@ -83,8 +84,8 @@ model=g_t2c_preprocess(model, opts)
 local function check(module, module2,input_dims)
     module:apply(function(m) m:evaluate() end)
     local opts = {
-            prototxt='1.prototxt',
-            caffemodel='1.caffemodel',
+            prototxt = string.format('%s.prototxt', basename),
+            caffemodel = string.format('%s.caffemodel', basename),
             inputs={{name="data", input_dims=input_dims}},
     }
     t2c.convert(opts, module)
@@ -93,7 +94,7 @@ local function check(module, module2,input_dims)
 end
 
 
-check(model, model2, {1,3,64,256})
+check(model, model2, {1,3,66,200})
 
 
 -- Save the model
