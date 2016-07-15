@@ -24,8 +24,6 @@ end
 
 
 local function adapt_spatial_dropout(net)
-  -- does not support recursive sequential(dropout)
-  --print (model)
     for i = 1, #net.modules do
         local c = net:get(i)
         local t = torch.type(c)
@@ -75,11 +73,8 @@ if model.net then
     model = model.net
     model2 = model2.net
 end
---model.net=g_t2c_preprocess(model.net, opts)
---model=nn.utils.recursiveType(model, 'torch.FloatTensor')
-model=g_t2c_preprocess(model, opts)
 
---torch.setdefaulttensortype('torch.FloatTensor')
+model=g_t2c_preprocess(model, opts)
 
 local function check(module, module2,input_dims)
     module:apply(function(m) m:evaluate() end)
@@ -94,9 +89,5 @@ local function check(module, module2,input_dims)
 end
 
 
-check(model, model2, {1,3,66,200})
+check(model, model2, {1,3,224,224})
 
-
--- Save the model
---local out_path = path:sub(1, #path - 4) .. "_c.t7b"
---torch.save(out_path, model.net)
