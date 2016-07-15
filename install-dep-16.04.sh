@@ -1,7 +1,7 @@
 
 echo
 echo This script will install fblualib and all its dependencies.
-echo It has been tested on Ubuntu 13.10 and Ubuntu 14.04, Linux x86_64.
+echo It has been Ubuntu 16.04, Linux x86_64.
 echo
 
 set -e
@@ -20,7 +20,7 @@ if [[ $issue =~ ^Ubuntu\ 16\.04 ]]; then
     extra_packages=libiberty-dev
     current=1
 else
-    echo "Ubuntu 13.10, 14.*, 15.04 or 16.04 required" >&2
+    echo "Ubuntu 16.04 required" >&2
     exit 1
 fi
 
@@ -89,7 +89,7 @@ autoreconf -ivf
 ./configure
 make
 sudo make install
-sudo ldconfig # reload the lib paths after freshly installed folly. fbthrift needs it.
+sudo ldconfig
 
 if [ $current -eq 1 ]; then
     echo

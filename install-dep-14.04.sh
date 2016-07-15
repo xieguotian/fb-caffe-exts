@@ -1,12 +1,3 @@
-#!/bin/bash -e
-#
-#  Copyright (c) 2014, Facebook, Inc.
-#  All rights reserved.
-#
-#  This source code is licensed under the BSD-style license found in the
-#  LICENSE file in the root directory of this source tree. An additional grant
-#  of patent rights can be found in the PATENTS file in the same directory.
-#
 
 echo
 echo This script will install fblualib and all its dependencies.
@@ -24,16 +15,10 @@ fi
 
 issue=$(cat /etc/issue)
 extra_packages=
-if [[ $issue =~ ^Ubuntu\ 13\.10 ]]; then
-    :
-elif [[ $issue =~ ^Ubuntu\ 14 ]]; then
-    extra_packages=libiberty-dev
-elif [[ $issue =~ ^Ubuntu\ 15\.04 ]]; then
-    extra_packages=libiberty-dev
-elif [[ $issue =~ ^Ubuntu\ 16\.04 ]]; then
+if [[ $issue =~ ^Ubuntu\ 14\.04 ]]; then
     extra_packages=libiberty-dev
 else
-    echo "Ubuntu 13.10, 14.* or 15.04 required" >&2
+    echo "Ubuntu 14.04 required" >&2
     exit 1
 fi
 
@@ -97,7 +82,7 @@ autoreconf -ivf
 ./configure
 make
 sudo make install
-sudo ldconfig # reload the lib paths after freshly installed folly. fbthrift needs it.
+sudo ldconfig 
 
 echo
 echo Building fbthrift
@@ -134,8 +119,6 @@ git clone https://github.com/torch/nn && ( cd nn && git checkout getParamsByDevi
 git clone https://github.com/facebook/fbtorch.git && ( cd fbtorch && luarocks make rocks/fbtorch-scm-1.rockspec )
 
 git clone https://github.com/facebook/fbnn.git && ( cd fbnn && luarocks make rocks/fbnn-scm-1.rockspec )
-
-git clone https://github.com/facebook/fbcunn.git && ( cd fbcunn && luarocks make rocks/fbcunn-scm-1.rockspec )
 
 
 echo
