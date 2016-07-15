@@ -3,10 +3,19 @@ require 'cunn'
 local pl = require 'pl.import_into'()
 local py = require 'fb.python'
 local torch = require 'torch'
---require 'fbtorch'
--- local logging = require 'fb.util.logging'
 local torch_layers = require 'torch2caffe.torch_layers'
 local t2c = py.import('torch2caffe.lib_py')
+
+-- Figure out the path of the model and load it
+local path = arg[1]
+local basename = paths.basename(path, 't7b')
+local ext = path:match("^.+(%..+)$")
+local model = nil
+if ext == '.t7b' or ext == '.t7' then 
+    torch_net = torch.load(path)
+else
+    assert(false, "We assume models end in either .t7b or .t7")
+end
 
 local function evaluate_caffe(caffe_net, inputs)
     local input_kwargs = {}
@@ -65,26 +74,22 @@ end
 
 
 local function test()
-    local torch_net = torch.load('gienet.t7b')
     if  torch_net.net then
         torch_net=torch_net.net
     end
     torch_net:apply(function(m) m:evaluate() end)
-    --torch_net=cudnn.convert(torch_net,nn)
-    --torch_net=nn.utils.recursiveType(model, 'torch.FloatTensor')
+
     local opts = {}
-    opts.prototxt = '1.prototxt'
-    opts.caffemodel = '1.caffemodel' 
+    opts.prototxt = string.format('%s.prototxt', basename)
+    opts.caffemodel = string.format('%s.caffemodel', basename)
     local caffe_net = t2c.load(opts)
 -- 
     local inputs={}
-    --local tensor = torch.load('input.txt','ascii')
-    local tensor = torch.rand(table.unpack({1,3,64,256})):float()
+    local tensor = torch.rand(table.unpack({1,3,224,224})):float()
     table.insert(inputs, {name='data', tensor=tensor})
     print ("\n\n\n\nTesting Caffe Model\n\n\n\n")
     
     local caffe_outputs = evaluate_caffe(caffe_net, inputs)
-   
  
     local torch_outputs
     -- Some networks only accept CUDA input.
@@ -142,8 +147,6 @@ local function test()
         end
     end    
     print (caffe_outputs[1])
---    torch.save('input.txt',tensor,'ascii', false)
---    torch.save('output.txt',caffe_outputs,'ascii',false)
 end
 --
 test()
