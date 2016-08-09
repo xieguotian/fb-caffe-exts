@@ -72,8 +72,8 @@ echo Cloning repositories
 echo
 
 
-git clone --depth 1 https://github.com/facebook/folly
-git clone --depth 1 https://github.com/facebook/fbthrift
+git clone --depth 1 https://github.com/zhanghang1989/folly.git
+git clone --depth 1 https://github.com/zhanghang1989/fbthrift
 git clone https://github.com/facebook/thpp
 git clone https://github.com/zhanghang1989/fblualib
 git clone https://github.com/facebook/wangle
