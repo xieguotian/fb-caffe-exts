@@ -72,7 +72,7 @@ echo Cloning repositories
 echo
 
 
-git clone --depth 1 https://github.com/zhanghang1989/folly.git
+git clone --depth 1 https://github.com/zhanghang1989/folly
 git clone --depth 1 https://github.com/zhanghang1989/fbthrift
 git clone https://github.com/facebook/thpp
 git clone https://github.com/zhanghang1989/fblualib
@@ -107,11 +107,6 @@ echo
 cd $dir/fbthrift/thrift
 autoreconf -ivf
 ./configure
-if [ $current -eq 1 ]; then
-    pushd lib/cpp2/fatal/internal
-    ln -s folly_dynamic-inl-pre.h folly_dynamic-inl.h
-    popd
-fi
 make
 sudo make install
 
