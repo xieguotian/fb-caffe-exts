@@ -84,7 +84,7 @@ def inner_product(torch_layer):
     num_output = int(torch_layer["num_output"])
     weight = torch_layer["weight"]
     layer.inner_product_param.num_output = num_output
-    layer.inner_product_param.axis = -1
+    # layer.inner_product_param.axis = -1
     if "bias" in torch_layer:
         bias = torch_layer["bias"]
         layer.blobs.extend([as_blob(weight), as_blob(bias)])
