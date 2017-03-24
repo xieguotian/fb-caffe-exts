@@ -36,8 +36,19 @@ function M.evaluate_caffe(caffe_net, inputs)
     return caffe_outputs
 end
 
+function M.evaluate_caffe_diff(caffe_net)
+    py.reval(t2c.set_diff(caffe_net))
+    caffe_net.backward()
+    py.reval(t2c.show_diff(caffe_net))
+end
+function M.evaluate_caffe_param_diff(caffe_net)
+    py.reval(t2c.set_diff(caffe_net))
+    caffe_net.backward()
+    py.reval(t2c.show_param_diff(caffe_net))
+end
 local function debug_nets(caffe_net, torch_net)
     py.reval(t2c.debug_net(caffe_net))
+count = 0
     torch_net:apply(
         function(m)
             if m.output then
@@ -54,13 +65,135 @@ local function debug_nets(caffe_net, torch_net)
                 end
                 print("Layer %s, %s, Sum: %s",
                                     torch.typename(m), sizes, sums)
+				--print(m)
+		print("test")
+		if torch.typename(m)=="nn.SpatialBatchNormalization" then
+		   print("runing_mean vs runing_var",torch.sum(m.running_mean),torch.sum(m.running_var),m.momentum)
+		   end
+--                if torch.typename(m)=="nn.SpatialMaxPooling" then
+--		   count = count + 1
+--		   py.reval(t2c.dump_data(torch.typename(m)..count,m.output:float()))
+--                end
+            end
+        end
+    )
+end
+
+local function debug_nets_diff(caffe_net,torch_net,inputs)
+      M.evaluate_caffe_diff(caffe_net)
+--      torch_net:backward(inputs, torch_net.output)
+    -- Torch multi-inputs take an ordered Table.
+    local function inputs_to_torch_inputs(inputs, type)
+        if #inputs == 1 then
+            return inputs[1].tensor:type(type)
+        end
+        local tensors = {}
+        for i=1,#inputs do
+            table.insert(tensors, inputs[i].tensor:type(type))
+        end
+        return tensors
+    end
+    -- Some networks only accept CUDA input.
+    local ok, err = pcall(function()
+            torch_net:float()
+            local torch_inputs = inputs_to_torch_inputs(
+                inputs, 'torch.FloatTensor')
+             torch_net:backward(torch_inputs,torch_net.output)
+    end)
+    if not ok then
+        print("\n\n\nGot error running forward: %s", err)
+        torch_net:cuda()
+        local torch_inputs = inputs_to_torch_inputs(
+            inputs, 'torch.CudaTensor')
+        torch_net:backward(torch_inputs,torch_net.output)
+    end
+
+    torch_net:apply(
+        function(m)
+            if m.gradInput then
+                local sizes = {}
+                local sums = {}
+                if type(m.gradInput) == 'table' then
+                    for i=1,#m.gradInput do
+                        table.insert(sizes, m.gradInput[i]:size())
+                        table.insert(sums, torch.sum(m.gradInput[i]))
+                    end
+                else
+                    sizes = torch.totable(m.gradInput:size())
+                    sums = torch.sum(m.gradInput)
+                end
+                print("Layer %s, %s, gradInput_Sum: %s",
+                                    torch.typename(m), sizes, sums)
+				--print(m)
+--		print("test")
+--                if torch.typename(m)=="nn.SpatialMaxPooling" then
+--		   count = count + 1
+--		   py.reval(t2c.dump_data(torch.typename(m)..count,m.output:float()))
+--                end
+            end
+        end
+    )
+end
+
+local function debug_nets_param_diff(caffe_net,torch_net,inputs)
+      torch_net:apply(
+		function(m) 
+		m:zeroGradParameters()	
+		end    
+		)
+      M.evaluate_caffe_param_diff(caffe_net)
+--      torch_net:backward(inputs, torch_net.output)
+    -- Torch multi-inputs take an ordered Table.
+    local function inputs_to_torch_inputs(inputs, type)
+        if #inputs == 1 then
+            return inputs[1].tensor:type(type)
+        end
+        local tensors = {}
+        for i=1,#inputs do
+            table.insert(tensors, inputs[i].tensor:type(type))
+        end
+        return tensors
+    end
+    -- Some networks only accept CUDA input.
+--    local ok, err = pcall(function()
+--            torch_net:float()
+--            local torch_inputs = inputs_to_torch_inputs(
+--               inputs, 'torch.FloatTensor')
+--             torch_net:backward(torch_inputs,torch_net.output)
+--    end)
+ok= false
+    if not ok then
+        print("\n\n\nGot error running forward: %s", err)
+        torch_net:cuda()
+        local torch_inputs = inputs_to_torch_inputs(
+            inputs, 'torch.CudaTensor')
+        torch_net:backward(torch_inputs,torch_net.output)
+    end
+
+    torch_net:apply(
+        function(m)
+            if m.gradWeight then
+                local sizes = {}
+                local sums = {}
+                if type(m.gradWeight) == 'table' then
+                    for i=1,#m.gradWeight do
+                        table.insert(sizes, m.gradWeight[i]:size())
+                        table.insert(sums, torch.sum(m.gradWeight[i]))
+                    end
+                else
+                    sizes = torch.totable(m.gradWeight:size())
+                    sums = torch.sum(m.gradWeight)
+                end
+                print("Layer %s, %s, gradWeight_Sum: %s",
+                                    torch.typename(m), sizes, sums)
             end
         end
     )
 end
 
 function M.compare(opts, torch_net)
-    torch_net:apply(function(m) m:evaluate() end)
+--    torch_net:apply(function(m) m:evaluate() end)
+    torch_net:apply(function(m) m:training() end)
     local inputs = {}
     for i=1,#opts.inputs do
         local input_spec = opts.inputs[i]
@@ -122,6 +255,8 @@ function M.compare(opts, torch_net)
                        #caffe_outputs, #torch_outputs))
         error("Inconsistent output blobs")
     end
+	print(caffe_outputs)
+	print(torch_outputs)
 
     for i = 1,#caffe_outputs do
         local torch_output = torch_outputs[i]
@@ -143,10 +278,13 @@ function M.compare(opts, torch_net)
                 require('fb.debugger').enter()
             end
             if (max_absolute_error > 0.001) then  
-                error("Error in conversion!")
+                --error("Error in conversion!")
             end
         end
     end
+--debug_nets_diff(caffe_net,torch_net,inputs)
+debug_nets_param_diff(caffe_net,torch_net,inputs)
+
     if os.getenv('LUA_DEBUG_ON_ERROR') then
         require('fb.debugger').enter()
     end

@@ -17,13 +17,13 @@ import logging
 import caffe
 import torch2caffe.caffe_layers
 import torch2caffe.caffe_builder
-
+import pickle
 from google.protobuf import text_format
 
 log = logging.getLogger(__name__)
 
 logging.basicConfig(level=logging.INFO)
-
+caffe.set_mode_gpu()
 Layer = collections.namedtuple(
     'Layer',
     ['typename', 'name', 'torch_layer', 'bottom_edges', 'top_edges'])
@@ -137,7 +137,7 @@ def finalize(opts, net):
 
 
 def load(opts):
-    net = caffe.Net(opts["prototxt"], opts["caffemodel"], caffe.TEST)
+    net = caffe.Net(opts["prototxt"], opts["caffemodel"], caffe.TRAIN)
     assert net, "Net is none?"
     return net
 
@@ -186,3 +186,35 @@ def debug_net(caffe_net):
     for blob_name, blob in caffe_net.blobs.iteritems():
         log.info("Blob Name: %s, %s, Sum: %s",
                  blob_name, blob.data.shape, blob.data.sum())
+    for blob_name, params in caffe_net.params.iteritems():
+        idx = 0
+        if 'BatchNorm' in blob_name:
+            log.info("Blob Name: %s, %s %s ,mean_var_Sum: %s %s",
+                     blob_name, params[0].data.shape, params[0].data.sum(),params[1].data.shape, params[1].data.sum())
+#        if blob_name=="caffe.
+        #if blob_name=="caffe.Pooling_3":
+        #     output = open(blob_name+".pkl","wb")
+        #     pickle.dump({blob_name:blob.data},output)
+
+def dump_data(name,data):
+    output = open(name+".pkl","wb")
+    pickle.dump({name:data},output)
+
+def show_diff(caffe_net):
+    for blob_name, blob in caffe_net.blobs.iteritems():
+        log.info("Blob Name: %s, %s,diff_Sum: %s",
+                 blob_name, blob.diff.shape, blob.diff.sum())
+
+def set_diff(caffe_net):
+    blob_name, blob = caffe_net.blobs.items()[-1]
+    caffe_net.blobs[blob_name].diff[...] = caffe_net.blobs[blob_name].data[...]
+
+def show_param_diff(caffe_net):
+    for layer in caffe_net.layers:
+        log.info("layer_type:%s",layer.type)
+    for blob_name, params in caffe_net.params.iteritems():
+        idx = 0
+        if 'BatchNorm' in blob_name:
+            idx = 3
+        log.info("Blob Name: %s, %s,diff_Sum: %s",
+                 blob_name, params[idx].diff.shape, params[idx].diff.sum())

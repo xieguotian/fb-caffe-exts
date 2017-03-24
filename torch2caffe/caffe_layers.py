@@ -173,11 +173,12 @@ def pooling(torch_layer):
         return layer
 
     if not torch_layer["ceil_mode"]:
+        layer.pooling_param.ceil_mode = False
         # layer.pooling_param.torch_pooling = True
-        if dH > 1 and padH > 0:
-            layer.pooling_param.pad_h = padH - 1
-        if dW > 1 and padW > 0:
-            layer.pooling_param.pad_w = padW - 1
+        #if dH > 1 and padH > 0:
+        #    layer.pooling_param.pad_h = padH - 1
+        #if dW > 1 and padW > 0:
+        #    layer.pooling_param.pad_w = padW - 1
     return layer
 
 
@@ -296,15 +297,66 @@ def bn(torch_layer):
 
 
 def batchnorm(torch_layer):
+    
+    layer = pb2.LayerParameter()
+    layer.type = "BatchNormTorch"
+    # Caffe BN doesn't support bias
+    #assert torch_layer["affine"]==0
+    layer.batch_norm_param.use_global_stats = 0
+    layer.batch_norm_param.moving_average_fraction = 0.1
+    layer.scale_param.bias_term=True
+    blobs_weight = np.ones((1,))
+    print(torch_layer.keys())
+    layer.blobs.extend([as_blob(torch_layer["running_mean"]),
+        as_blob(torch_layer["running_var"]), as_blob(blobs_weight),
+                        as_blob(torch_layer["weight"]),as_blob(torch_layer["bias"])])
+    return layer
+    
+    """
     layer = pb2.LayerParameter()
     layer.type = "BatchNorm"
     # Caffe BN doesn't support bias
-    assert torch_layer["affine"]==0
+    #assert torch_layer["affine"]==0
     layer.batch_norm_param.use_global_stats = 1
     blobs_weight = np.ones(1)
     layer.blobs.extend([as_blob(torch_layer["running_mean"]), 
         as_blob(torch_layer["running_var"]), as_blob(blobs_weight)])
-    return layer
+    #print(torch_layer.keys())
+
+    layer_2 = pb2.LayerParameter()
+    layer_2.type = "Scale"
+    layer_2.scale_param.bias_term = True
+    #tmp_w = 0*np.ones(torch_layer["weight"].shape)
+    #print(tmp_w.shape)
+    #tmp_w[-1] = 1
+    #tmp_bias = np.zeros(torch_layer["bias"].shape)
+    layer_2.blobs.extend([as_blob(torch_layer["weight"]),
+                        as_blob(torch_layer["bias"])])
+    #layer_2.blobs.extend([as_blob(tmp_w),
+    #                      as_blob(tmp_bias)])
+
+    #print(layer_2.blobs[0].data)
+    #print(np.abs(np.array(layer_2.blobs[1].data)).sum())
+    """
+
+    '''
+    layer_2 = pb2.LayerParameter()
+    layer_2.type = "Convolution"
+    weight = torch_layer["weight"]
+
+    layer_2.convolution_param.num_output = weight.shape[0]
+    layer_2.convolution_param.kernel_w = 1
+    layer_2.convolution_param.stride_w = 1
+    layer_2.convolution_param.pad_w = 0
+    layer_2.convolution_param.kernel_h = 1
+    layer_2.convolution_param.stride_h = 1
+    layer_2.convolution_param.pad_h = 0
+    layer_2.convolution_param.group = weight.shape[0]
+
+    bias = torch_layer["bias"]
+    layer_2.blobs.extend([as_blob(weight[:,np.newaxis,np.newaxis,np.newaxis]), as_blob(bias)])
+    '''
+    #return layer,layer_2
 
 
 def build_converter(opts):

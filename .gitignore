@@ -4,3 +4,12 @@ torch2caffe/*.pyc
 *.prototxt
 *.csv
 
+/model/
+*.txt#
+*.Pooling_3.pkl
+/caffe_18.txt
+*.png
+*.txt
+*.pkl
+*.sh~
+*.py~

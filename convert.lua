@@ -1,6 +1,6 @@
 require 'nn';
-require 'cunn';
-require 'cudnn';
+--require 'cunn';
+--require 'cudnn';
 require 'torch2caffe/prepnv.lua'
 local t2c=require 'torch2caffe.lib'
 
@@ -8,6 +8,7 @@ local t2c=require 'torch2caffe.lib'
 local path = arg[1]
 local basename = paths.basename(path, 't7b')
 local ext = path:match("^.+(%..+)$")
+print(ext)
 local model = nil
 if ext == '.t7b' then 
     model = torch.load(path)
@@ -36,5 +37,5 @@ local function check(module, module2,input_dims)
 end
 
 
-check(model, model2, {1,1,66,200})
+check(model, model2, {50,3,224,224})
 

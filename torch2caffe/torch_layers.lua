@@ -108,6 +108,22 @@ M.CONVERTER = {
                           1, -- num_tops
                           false)) -- inplace
     end,
+    ['nn.DepthConcat$'] = function(net, layer, bottom_edges, top_edges)
+        local mid_edges = {}
+        for i = 1, #layer.modules do
+            local mid_edge = M.add(net, layer.modules[i], bottom_edges, nil)
+            assert(#mid_edge == 1)
+            table.insert(mid_edges, mid_edge[1])
+        end
+        return py.eval(
+            net.add_layer("caffe.Concat",
+                          {axis=(layer.dimension - 1)},
+                          mid_edges, -- bottom_edges
+                          top_edges, -- top_edges
+                          #layer.modules, -- num_bottoms
+                          1, -- num_tops
+                          false)) -- inplace
+    end,	
     ['nn.ParallelTable$'] = function(net, layer, bottom_edges, top_edges)
         assert(#bottom_edges == #layer.modules)
         local actual_top_edges = {}

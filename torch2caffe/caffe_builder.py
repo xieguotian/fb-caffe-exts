@@ -25,6 +25,21 @@ def to_caffe(layers, edges, opts):
     for layer in layers:
         caffe_layer = torch2caffe.caffe_layers.convert(
             opts, layer.typename, layer.torch_layer)
+        """
+        if layer.typename=='caffe.BatchNorm':
+            #print(layer.typename)
+            #print(edges[layer.bottom_edges[0]].name)
+            #print(edges[layer.top_edges[0]].name)
+            caffe_layer[0].name = layer.name
+            caffe_layer[0].bottom.extend([edges[i].name for i in layer.bottom_edges])
+            caffe_layer[0].top.extend([edges[i].name.replace('BatchNorm','Scale') for i in layer.top_edges])
+            caffe_layers.append(caffe_layer[0])
+            caffe_layer[1].name = layer.name.replace('BatchNorm','Scale')+"_t"
+            caffe_layer[1].bottom.extend([edges[i].name.replace('BatchNorm','Scale') for i in layer.top_edges])
+            caffe_layer[1].top.extend([edges[i].name for i in layer.top_edges])
+            caffe_layers.append(caffe_layer[1])
+            continue
+        """
         caffe_layer.name = layer.name
         caffe_layer.bottom.extend([edges[i].name for i in layer.bottom_edges])
         caffe_layer.top.extend([edges[i].name for i in layer.top_edges])
@@ -32,6 +47,7 @@ def to_caffe(layers, edges, opts):
 
     """ 2. caffe input parameters """
     text_net = pb2.NetParameter()
+    text_net.force_backward = True
     if os.environ.get("T2C_DEBUG"):
         text_net.debug_info = True
     for input_spec in opts["inputs"]:
@@ -46,6 +62,8 @@ def to_caffe(layers, edges, opts):
     binary_weights = pb2.NetParameter()
     binary_weights.CopyFrom(text_net)
     for caffe_layer in caffe_layers:
+        if caffe_layer.type=='Scale':
+            print(caffe_layer.blobs[1].data)
         binary_weights.layer.extend([caffe_layer])
         without_weights = pb2.LayerParameter()
         without_weights.CopyFrom(caffe_layer)
